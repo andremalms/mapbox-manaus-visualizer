@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Map, { Source, Layer } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -13,7 +13,7 @@ const MapComponent = ({ wmsUrl, wmsLayers }) => {
 
   const [wmsSource, setWmsSource] = useState(null);
 
-  const onMapLoad = useCallback(() => {
+  useEffect(() => {
     if (wmsUrl && wmsLayers) {
       const newWmsSource = {
         type: 'raster',
@@ -25,6 +25,10 @@ const MapComponent = ({ wmsUrl, wmsLayers }) => {
       setWmsSource(newWmsSource);
     }
   }, [wmsUrl, wmsLayers]);
+
+  const onMapLoad = useCallback(() => {
+    // Map loaded callback if needed
+  }, []);
 
   return (
     <div className="w-full h-[calc(100vh-4rem)]">

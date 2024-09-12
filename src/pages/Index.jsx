@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MapComponent from '../components/MapComponent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [wmsUrl, setWmsUrl] = useState('');
@@ -10,7 +11,12 @@ const Index = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!wmsUrl || !wmsLayers) {
+      toast.error('Please provide both WMS URL and Layers');
+      return;
+    }
     setShowMap(true);
+    toast.success('Map loaded successfully');
   };
 
   return (
