@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Map, { Source, Layer } from 'react-map-gl';
+import React, { useState, useEffect } from 'react';
+import Map from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = 'YOUR_MAPBOX_TOKEN_HERE'; // Replace with your actual Mapbox token
@@ -11,45 +11,43 @@ const MapComponent = ({ wmsUrl, wmsLayers }) => {
     zoom: 11
   });
 
-  const [wmsSource, setWmsSource] = useState(null);
-
   useEffect(() => {
-    if (wmsUrl && wmsLayers) {
-      const newWmsSource = {
+    if (wmsUrl && wmsLayers && map.current) {
+      const wmsLayer = {
+        id: 'wms-layer',
         type: 'raster',
-        tiles: [
-          `${wmsUrl}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=${wmsLayers}&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&STYLES=&BBOX={bbox-epsg-3857}`
-        ],
-        tileSize: 256
+        source: {
+          type: 'raster',
+          tiles: [
+            `${wmsUrl}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=${wmsLayers}&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&STYLES=&BBOX={bbox-epsg-3857}`
+          ],
+          tileSize: 256
+        },
+        paint: {}
       };
-      setWmsSource(newWmsSource);
+
+      if (map.current.getLayer('wms-layer')) {
+        map.current.removeLayer('wms-layer');
+      }
+      if (map.current.getSource('wms-source')) {
+        map.current.removeSource('wms-source');
+      }
+
+      map.current.addLayer(wmsLayer);
     }
   }, [wmsUrl, wmsLayers]);
 
-  const onMapLoad = useCallback(() => {
-    // Map loaded callback if needed
-  }, []);
+  const map = React.useRef(null);
 
   return (
     <div className="w-full h-[calc(100vh-4rem)]">
       <Map
+        ref={map}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         mapboxAccessToken={MAPBOX_TOKEN}
-        onLoad={onMapLoad}
-      >
-        {wmsSource && (
-          <Source id="wms-source" {...wmsSource}>
-            <Layer
-              id="wms-layer"
-              type="raster"
-              source="wms-source"
-              paint={{}}
-            />
-          </Source>
-        )}
-      </Map>
+      />
     </div>
   );
 };
